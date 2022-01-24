@@ -19,13 +19,13 @@ if (!brokerAddress || regName === "-h" || regName === "--help") {
         `use:
 
 to list registers and watch their values:
-mqttreg <mqtt-broker>
+mqr
 
 to get specific register value as JSON:
-mqttreg <mqtt-broker> <reg-name>
+mqr <reg-name>
 
 to set specific register value as JSON:
-mqttreg <mqtt-broker> <reg-name> <reg-value>
+mqr <reg-name> <reg-value>
 
 the tool expects MQTT environment variable to point to MQTT broker
 `
