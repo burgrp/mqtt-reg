@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const MqttMtl = require("@device.farm/mqtt-mtl");
+const MqttMtl = require("@burgrp/mqtt-mtl");
 const deepEqual = require("fast-deep-equal");
 mqttReg = require("./mqtt-reg.js");
 mqttAdvertise = require("./mqtt-advertise.js");
