@@ -1,9 +1,9 @@
 {
-	"name": "@device.farm/mqtt-reg",
+	"name": "@burgrp/mqtt-reg",
 	"version": "1.0.22",
 	"author": "pb@drake.cz",
 	"dependencies": {
-		"@device.farm/mqtt-mtl": "^1.0.2",
+		"@burgrp/mqtt-mtl": "^1.0.2",
 		"fast-deep-equal": "^2.0.1"
 	},
 	"main": "src/index.js",
