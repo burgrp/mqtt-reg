@@ -1,6 +1,13 @@
 const deepEqual = require("fast-deep-equal");
 
-module.exports = (mqttMtl, register, cb, timeoutMs) => {
+module.exports = (
+	{
+		mqttMtl,
+		name,
+		callback,
+		timeoutMs,
+		wildcard
+	}) => {
 
 	if (!timeoutMs) {
 		timeoutMs = 8000 + Math.random() * 4000;
@@ -15,7 +22,7 @@ module.exports = (mqttMtl, register, cb, timeoutMs) => {
 
 	function safeCb(...args) {
 		try {
-			cb(...args);
+			callback(...args);
 		} catch (e) {
 			console.error("Error in register callback", e);
 		}
@@ -24,52 +31,59 @@ module.exports = (mqttMtl, register, cb, timeoutMs) => {
 	function resetTimeout() {
 
 		askedByAnother = false;
-		
+
 		if (timeout) {
 			clearTimeout(timeout);
 		}
-		
+
 		timeout = setTimeout(() => {
-			
+
 			if (!firstTimeout) {
 				let prev = actual;
 				actual = undefined;
 				if (!deepEqual(actual, prev)) {
 					safeCb(actual, prev, false);
-				}				
+				}
 			}
-			
+
 			firstTimeout = false;
 			getOrSet();
 			resetTimeout();
-			
+
 		}, timeoutMs);
 	}
 
 	function getOrSet() {
 		if (desired !== undefined) {
-			mqttMtl.publish(`register/${register}/set`, JSON.stringify(desired));
+			mqttMtl.publish(`register/${name}/set`, JSON.stringify(desired));
 		} else {
 			if (!askedByAnother) {
-				mqttMtl.publish(`register/${register}/get`);
+				mqttMtl.publish(`register/${name}/get`);
 			}
 		}
 	}
 
-	// reset timeout if someone else is also trying to get/set the register 
-	mqttMtl.subscribe(`register/${register}/get`, (topic, message) => {
+	function topic(suffix) {
+		return wildcard? {
+			strict: `register/${name}/${suffix}`,
+			loose: `register/+/${suffix}`,
+		}: `register/${name}/${suffix}`
+	}
+
+	// reset timeout if someone else is also trying to get/set the register
+	mqttMtl.subscribe(topic("get"), (topic, message) => {
 		askedByAnother = true;
 	});
 
-	mqttMtl.subscribe(`register/${register}/set`, (topic, message) => {
+	mqttMtl.subscribe(topic("set"), (topic, message) => {
 		askedByAnother = true;
 	});
 
-	mqttMtl.subscribe(`register/${register}/is`, (topic, message) => {
+	mqttMtl.subscribe(topic("is"), (topic, message) => {
 
 		firstTimeout = true;
 		let prev = actual;
-		
+
 		let str = message.toString();
 		if (str === "") {
 			actual = undefined;

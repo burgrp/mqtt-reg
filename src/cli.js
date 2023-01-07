@@ -32,7 +32,7 @@ the tool expects MQTT environment variable to point to MQTT broker
     );
 } else {
 
-    const mqttMtl = MqttMtl(`mqtt://${brokerAddress}`);   
+    const mqttMtl = MqttMtl(`mqtt://${brokerAddress}`);
 
     if (!regName) {
         let regs = {};
@@ -40,10 +40,15 @@ the tool expects MQTT environment variable to point to MQTT broker
 
             if (!regs[name]) {
                 regs[name] = meta;
-                console.info(name, "-", Object.entries(meta).map(([k, v]) => `${k}:${v}`).join(", "));               
-                mqttReg(mqttMtl, name, (actual, prev, initial) => {
-                    if (!initial) {
-                        console.info(name, "=", actual);
+                console.info(name, "-", Object.entries(meta).map(([k, v]) => `${k}:${v}`).join(", "));
+                mqttReg({
+                    mqttMtl,
+                    name,
+                    wildcard: true,
+                    callback: (actual, prev, initial) => {
+                        if (!initial) {
+                            console.info(name, "=", actual);
+                        }
                     }
                 });
             }
@@ -52,19 +57,27 @@ the tool expects MQTT environment variable to point to MQTT broker
     } else {
         if (regValue === undefined) {
 
-            mqttReg(mqttMtl, regName, (actual, prev, initial) => {
-                if (!initial) {
-                    console.info(JSON.stringify(actual));
-                    process.exit(0);
+            mqttReg({
+                mqttMtl,
+                name: regName,
+                callback: (actual, prev, initial) => {
+                    if (!initial) {
+                        console.info(JSON.stringify(actual));
+                        process.exit(0);
+                    }
                 }
             });
 
         } else {
             regValue = JSON.parse(regValue);
 
-            let reg = mqttReg(mqttMtl, regName, actual => {
-                if (deepEqual(actual, regValue)) {
-                    process.exit(0);
+            let reg = mqttReg({
+                mqttMtl,
+                name: regName,
+                callback: actual => {
+                    if (deepEqual(actual, regValue)) {
+                        process.exit(0);
+                    }
                 }
             });
 
