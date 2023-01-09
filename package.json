@@ -3,7 +3,7 @@
 	"version": "2.0.0",
 	"author": "pb@drake.cz",
 	"dependencies": {
-		"@burgrp/mqtt-mtl": "^1.1.0",
+		"@burgrp/mqtt-mtl": "^1.1.1",
 		"fast-deep-equal": "^2.0.1"
 	},
 	"main": "src/index.js",

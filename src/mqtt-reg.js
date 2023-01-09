@@ -6,7 +6,6 @@ module.exports = (
 		name,
 		callback,
 		timeoutMs,
-		wildcard
 	}) => {
 
 	if (!timeoutMs) {
@@ -26,6 +25,10 @@ module.exports = (
 		} catch (e) {
 			console.error("Error in register callback", e);
 		}
+	}
+
+	function topic(suffix) {
+		return `register/${name}/${suffix}`;
 	}
 
 	function resetTimeout() {
@@ -55,19 +58,12 @@ module.exports = (
 
 	function getOrSet() {
 		if (desired !== undefined) {
-			mqttMtl.publish(`register/${name}/set`, JSON.stringify(desired));
+			mqttMtl.publish(topic("set"), JSON.stringify(desired));
 		} else {
 			if (!askedByAnother) {
-				mqttMtl.publish(`register/${name}/get`);
+				mqttMtl.publish(topic("get"));
 			}
 		}
-	}
-
-	function topic(suffix) {
-		return wildcard? {
-			strict: `register/${name}/${suffix}`,
-			loose: `register/+/${suffix}`,
-		}: `register/${name}/${suffix}`
 	}
 
 	// reset timeout if someone else is also trying to get/set the register
